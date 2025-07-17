@@ -1,4 +1,5 @@
 version: "3.9"
+
 services:
   postgres:
     image: postgres:16
@@ -13,6 +14,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
       interval: 10s
       retries: 5
+
   nats:
     image: nats:2.10-alpine
     restart: unless-stopped
@@ -24,5 +26,13 @@ services:
       test: ["CMD", "nc", "-z", "localhost", "4222"]
       interval: 10s
       retries: 5
+
+  env_detector:              # 🆕 first VAIA module
+    build: ./modules/env_detector
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - nats
+
 volumes:
   db_data:
