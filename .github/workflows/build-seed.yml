@@ -19,12 +19,15 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install build dependencies    # <— new step
+        run: pip install psutil
+
       - name: Install PyInstaller
         run: pip install pyinstaller
 
       - name: Build executable
-        run: |
-          pyinstaller --onefile core/seed_bootstrap.py
+        run: pyinstaller --onefile core/seed_bootstrap.py
+
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
