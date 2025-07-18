@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "service": "env_detector",
+    "phase": 1,
+    "container": "vaiaseed-env_detector-1",
+    "healthy": true
+  },
+  {
+    "service": "vaia_core",
+    "phase": 1,
+    "container": "vaiaseed-vaia_core-1",
+    "healthy": true
+  },
+  {
+    "service": "memory_store",
+    "phase": 2,
+    "container": "vaiaseed-memory_store-1",
+    "healthy": true
+  },
+  {
+    "service": "watchtower",
+    "phase": 2,
+    "container": "vaiaseed-watchtower-1",
+    "healthy": true
+  },
+  {
+    "service": "vaia_comm_engine",
+    "phase": 3,
+    "container": "vaiaseed-vaia_comm_engine-1",
+    "healthy": true
+  }
+]

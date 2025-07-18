@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:16
@@ -21,18 +19,70 @@ services:
     command: ["-js"]
     ports:
       - "4222:4222"
-      - "8222:8222"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "4222"]
       interval: 10s
       retries: 5
 
-  env_detector:              # 🆕 first VAIA module
+  env_detector:
     build: ./modules/env_detector
     restart: unless-stopped
     depends_on:
       - postgres
       - nats
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep python || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  vaia_core:
+    build: ./modules/vaia_core
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - nats
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/heartbeat"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  memory_store:
+    build: ./modules/memory_store
+    restart: unless-stopped
+    volumes:
+      - memory_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep python || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  watchtower:
+    build: ./modules/watchtower
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep python || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  vaia_comm_engine:
+    build: ./modules/vaia_comm_engine
+    restart: unless-stopped
+    ports:
+      - "8010:8010"
+    depends_on:
+      - vaia_core
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8010/ping || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 volumes:
   db_data:
+  memory_data:
