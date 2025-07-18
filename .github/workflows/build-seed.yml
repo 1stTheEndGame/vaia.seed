@@ -1,15 +1,15 @@
 name: Build Seed Executable
 
 on:
-  push:
-    tags:
-      - "v*"
+  push:                          # 🔔 build on every commit to main …
+    branches: [ main ]
+    tags:     [ "v*" ]           # … and also on any tag that starts with v
 
 jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]   # 🆕 build on Linux *and* Windows
+        os: [ ubuntu-latest, windows-latest ]   # build Linux + Windows
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -19,7 +19,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install build dependencies    # <— new step
+      # --- extra dep so PyInstaller sees psutil ----
+      - name: Install build deps
         run: pip install psutil
 
       - name: Install PyInstaller
@@ -31,7 +32,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          # Each OS gets its own ZIP: seed-binaries-ubuntu, seed-binaries-windows
           name: seed-binaries-${{ matrix.os }}
-          path: |
-            dist/seed_bootstrap*
+          path: dist/seed_bootstrap*
