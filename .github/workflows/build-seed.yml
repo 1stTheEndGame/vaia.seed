@@ -1,16 +1,13 @@
 name: Build Seed Executable
 
 on:
-  push:                          # 🔔 build on every commit to main …
+  push:                     # run on every push to main *and* on any v-tag
     branches: [ main ]
-    tags:     [ "v*" ]           # … and also on any tag that starts with v
+    tags:     [ "v*" ]
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, windows-latest ]   # build Linux + Windows
-    runs-on: ${{ matrix.os }}
+  build-linux:
+    runs-on: ubuntu-latest   # 🎯 build only on Linux for now
 
     steps:
       - uses: actions/checkout@v4
@@ -19,18 +16,17 @@ jobs:
         with:
           python-version: "3.12"
 
-      # --- extra dep so PyInstaller sees psutil ----
-      - name: Install build deps
+      - name: Install build deps          # psutil for env_detector
         run: pip install psutil
 
       - name: Install PyInstaller
         run: pip install pyinstaller
 
       - name: Build executable
-        run: pyinstaller --onefile core/seed_bootstrap.py
+        run: pyinstaller --noconfirm --onefile core/seed_bootstrap.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: seed-binaries-${{ matrix.os }}
+          name: seed-binaries-linux
           path: dist/seed_bootstrap*
