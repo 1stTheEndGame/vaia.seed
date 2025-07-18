@@ -1,32 +1,27 @@
-name: Build Seed Executable
+name: Build Seed Executable (Windows)
 
 on:
-  push:                     # run on every push to main *and* on any v-tag
-    branches: [ main ]
-    tags:     [ "v*" ]
+  push:
+    tags: [ "v*" ]          # build only when you push a v-tag
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest   # 🎯 build only on Linux for now
+  build-win:
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install build deps          # psutil for env_detector
-        run: pip install psutil
-
-      - name: Install PyInstaller
-        run: pip install pyinstaller
-
-      - name: Build executable
-        run: pyinstaller --noconfirm --onefile core/seed_bootstrap.py
+      - name: Build exe with PyInstaller
+        shell: bash          # use bash to avoid the PowerShell/debug prompt
+        run: |
+          pip install psutil pyinstaller
+          pyinstaller --noconfirm --onefile core/seed_bootstrap.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: seed-binaries-linux
-          path: dist/seed_bootstrap*
+          name: seed-binaries-windows
+          path: dist/seed_bootstrap*.exe
