@@ -29,65 +29,8 @@ def save_json(path, obj):
 
 
 def run(cmd, **kw):
-    print(f"$ {' '.join(cmd)}")
-    subprocess.check_call(cmd, cwd=ROOT, **kw)
-
-
-def container_healthy(name: str, timeout: int = 30) -> bool:
-    """Poll `docker inspect` until container is healthy or timeout."""
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        try:
-            status = subprocess.check_output(
-                ["docker", "inspect", "--format", "{{.State.Health.Status}}", name],
-                text=True,
-            ).strip()
-        except subprocess.CalledProcessError:
-            status = "unknown"
-        if status in ("healthy", "running"):
-            return True
-        time.sleep(2)
-    return False
-
-# ---------------- phase parser ----------------
-
-def parse_deployment_plan(md_path):
-    """Return list of (phase_number, [services])."""
-    phases = []
-    current = None
-    for line in md_path.read_text(encoding="utf‑8").splitlines():
-        phase_match = re.match(r"#+\s*Phase\s+(\d+)", line, re.I)
-        if phase_match:
-            if current:
-                phases.append(current)
-            current = (int(phase_match.group(1)), [])
-            continue
-        service_match = re.match(r"[-*]\s+([a-zA-Z0-9_\-]+)", line)
-        if service_match and current:
-            current[1].append(service_match.group(1))
-    if current:
-        phases.append(current)
-    phases.sort(key=lambda p: p[0])
-    return phases
-
-# ---------------- main flow ----------------
-
-def main():
-    doctrine = load_json(ROOT / "core" / "doctrine.json")
-    print("Loaded doctrine:", doctrine.get("mission", "<no mission>"))
-
-    phases = parse_deployment_plan(PLAN_FILE)
-    if not phases:
-        print("⚠️  No phases found in deployment plan—starting all services defined in docker‑compose.yml")
-        run(COMPOSE_CMD + ["up", "-d"])
-        return
-
-    registry = []
-    for phase_num, services in phases:
-        if not services:
-            continue
-        print(f"
-▶️  Phase {phase_num}: starting {', '.join(services)}")
+            print(f"
+Phase {phase_num}: starting {', '.join(services)}") {', '.join(services)}")
         run(COMPOSE_CMD + ["up", "-d", *services])
         # health‑check each service
         for svc in services:
@@ -102,8 +45,8 @@ def main():
             status = "✅" if healthy else "❌"
             print(f"  {status} {svc}")
         save_json(REGISTRY, registry)
-    print("
-🌱  Bootstrap complete. Registry written to core/registry.json")
+        print("
+Bootstrap complete. Registry written to core/registry.json")
 
 if __name__ == "__main__":
     try:
