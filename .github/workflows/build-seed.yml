@@ -28,7 +28,6 @@ jobs:
       - name: Build executable
         run: pyinstaller --onefile core/seed_bootstrap.py
 
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
