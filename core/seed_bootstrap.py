@@ -7,7 +7,6 @@ Phase-aware Seed.VAIA bootstrapper
 """
 import subprocess, json, re, sys, pathlib, time
 
-# ── locate project root whether .py or PyInstaller exe ────────────────────────
 ROOT = pathlib.Path(sys.executable).parent if getattr(sys, "frozen", False) \
        else pathlib.Path(__file__).resolve().parent.parent
 
@@ -16,14 +15,13 @@ REGISTRY = ROOT / "core" / "registry.json"
 PLAN_MD  = DOCS_DIR / "VAIA_Initial_Module_Deployment_Plan.md"
 COMPOSE  = ["docker", "compose"]
 
-# ── helpers ───────────────────────────────────────────────────────────────────
 load_json  = lambda p: json.loads(p.read_text("utf-8")) if p.exists() else []
 save_json  = lambda p, obj: p.write_text(json.dumps(obj, indent=2), "utf-8")
 
-def sh(cmd):                         # run and echo
+def sh(cmd):
     print("$", *cmd); subprocess.check_call(cmd, cwd=ROOT)
 
-def container_ok(name, timeout=30): # wait for healthy|running
+def container_ok(name, timeout=30):
     end = time.time() + timeout
     while time.time() < end:
         try:
@@ -38,7 +36,6 @@ def container_ok(name, timeout=30): # wait for healthy|running
     return False
 
 def parse_plan(md_path):
-    """Return list of (phase_num, [services])."""
     phases, current = [], None
     for ln in md_path.read_text("utf-8").splitlines():
         m_phase = re.match(r"#.+?Phase\s+(\d+)", ln, re.I)
@@ -53,7 +50,6 @@ def parse_plan(md_path):
     phases.sort(key=lambda p: p[0])
     return phases
 
-# ── main ──────────────────────────────────────────────────────────────────────
 def main():
     doctrine = load_json(ROOT / "core" / "doctrine.json")
     print("Mission:", doctrine.get("mission", "<unset>"))

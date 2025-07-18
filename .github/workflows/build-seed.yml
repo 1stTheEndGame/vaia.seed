@@ -2,7 +2,7 @@ name: Build Seed Executable (Windows)
 
 on:
   push:
-    tags: [ "v*" ]          # build only when you push a v-tag
+    tags: [ "v*" ]
 
 jobs:
   build-win:
@@ -15,7 +15,7 @@ jobs:
           python-version: "3.12"
 
       - name: Build exe with PyInstaller
-        shell: bash          # use bash to avoid the PowerShell/debug prompt
+        shell: bash
         run: |
           pip install psutil pyinstaller
           pyinstaller --noconfirm --onefile core/seed_bootstrap.py
